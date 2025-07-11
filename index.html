@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATS-Friendly Resume Builder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: vertical;
+    }
+    button {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+  </style>
+</head>
+<body>
+  <h1>ATS-Friendly Resume Builder</h1>
+  <form id="resumeForm">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required />
+
+    <label for="location">Location</label>
+    <input type="text" id="location" name="location" required />
+
+    <label for="phone">Phone</label>
+    <input type="text" id="phone" name="phone" required />
+
+    <label for="email">Email</label>
+    <input type="text" id="email" name="email" required />
+
+    <label for="summary">Summary</label>
+    <textarea id="summary" name="summary" rows="4"></textarea>
+
+    <label for="skills">Skills (comma-separated)</label>
+    <textarea id="skills" name="skills" rows="3"></textarea>
+
+    <label for="experience">Experience</label>
+    <textarea id="experience" name="experience" rows="4"></textarea>
+
+    <label for="education">Education</label>
+    <textarea id="education" name="education" rows="4"></textarea>
+
+    <label for="languages">Languages</label>
+    <textarea id="languages" name="languages" rows="3"></textarea>
+
+    <button type="submit">Generate PDF</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("resumeForm");
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = {};
+      Array.from(form.elements).forEach((el) => {
+        if (el.name) {
+          formData[el.name] = el.value;
+        }
+      });
+      const res = await fetch("http://localhost:5000/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "resume.pdf";
+      link.click();
+    });
+  </script>
+</body>
+</html>
