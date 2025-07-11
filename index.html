@@ -86,26 +86,66 @@
   </form>
 
   <script>
-    const form = document.getElementById("resumeForm");
-    form.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const formData = {};
-      Array.from(form.elements).forEach((el) => {
-        if (el.name) {
-          formData[el.name] = el.value;
+    // frontend/script.js
+
+document.getElementById('resumeForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting the traditional way
+
+    const createButton = document.getElementById('createButton');
+    const originalButtonText = createButton.innerHTML;
+    createButton.innerHTML = 'Generating...';
+    createButton.disabled = true;
+
+    // Create a FormData object from the form
+    const formData = new FormData(this);
+    // Convert FormData to a plain object
+    const data = Object.fromEntries(formData.entries());
+
+    // Send the data to the backend API
+    fetch('/api/resume', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => {
+        if (!response.ok) {
+            // If the server response is not ok, throw an error
+            throw new Error('Network response was not ok.');
         }
-      });
-      const res = await fetch("http://localhost:5000/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const blob = await res.blob();
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "resume.pdf";
-      link.click();
+        // The response is a PDF file, so we read it as a blob
+        return response.blob();
+    })
+    .then(blob => {
+        // Create a URL for the blob object
+        const url = window.URL.createObjectURL(blob);
+        // Create a temporary anchor (<a>) element to trigger the download
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'resume.pdf'; // The filename for the download
+        document.body.appendChild(a);
+        
+        // Programmatically click the anchor to start the download
+        a.click();
+        
+        // Clean up by revoking the object URL and removing the anchor
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Restore button state
+        createButton.innerHTML = originalButtonText;
+        createButton.disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to generate resume. Please check the console for errors.');
+        // Restore button state
+        createButton.innerHTML = originalButtonText;
+        createButton.disabled = false;
     });
+});
   </script>
 </body>
 </html>
