@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const puppeteer = require('puppeteer');
 const generateResumeHTML = require('./resumeTemplate');
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const app = express();
 app.use(cors());
